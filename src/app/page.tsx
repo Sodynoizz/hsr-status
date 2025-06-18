@@ -1,103 +1,193 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Wifi, WifiOff, Star, Zap, RefreshCw } from "lucide-react";
+
+const Index = () => {
+  const [isOnline, setIsOnline] = useState(false);
+  const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
+
+  useEffect(() => {
+    const updateStatus = async () => {
+      const data = await fetchStatus();
+      console.log(data)
+      
+      if (!data) {
+        console.error("Failed to fetch status");
+        return;
+      }
+
+      setIsOnline(data.isPlayingHSR);
+      setLastUpdate(new Date());
+    };
+
+    updateStatus(); // initial fetch
+
+    const interval = setInterval(updateStatus, 60000); // refresh every minute
+    return () => clearInterval(interval);
+  }, []);
+
+    const handleRefresh = () => {
+    window.location.reload();
+  };
+  
+  const fetchStatus = async () => {
+    try {
+      const res = await fetch('https://corsproxy.io/?https://discord-activity-tracker.onrender.com/status');
+      const data = await res.json(); 
+      return data;
+    } catch (e) {
+      return null;
+    }
+  };
+
+  const formatTime = (date: Date) => {
+    return date.toLocaleTimeString("en-US", {
+      hour12: true,
+      hour: "numeric",
+      minute: "2-digit",
+    });
+  };
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
+      {/* Animated starfield background */}
+      <div className="absolute inset-0">
+        {[...Array(50)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-1 h-1 bg-white rounded-full animate-pulse"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 3}s`,
+              animationDuration: `${2 + Math.random() * 2}s`,
+            }}
+          />
+        ))}
+      </div>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+      {/* Gradient overlays for depth */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-blue-500/10" />
+
+      <div className="relative z-10 container mx-auto px-4 py-8 min-h-screen flex items-center justify-center">
+        <div className="w-full max-w-md">
+          {/* Main Status Card */}
+          <Card className="bg-slate-800/60 backdrop-blur-md border-slate-700/50 shadow-2xl">
+            <CardContent className="p-8 text-center">
+              {/* Status Icon */}
+              <div className="mb-6 relative">
+                <div
+                  className={`w-24 h-24 mx-auto rounded-full flex items-center justify-center transition-all duration-500 ${
+                    isOnline
+                      ? "bg-gradient-to-br from-green-400 to-emerald-500 shadow-lg shadow-green-500/30"
+                      : "bg-gradient-to-br from-gray-500 to-slate-600 shadow-lg shadow-gray-500/20"
+                  }`}
+                >
+                  {isOnline ? (
+                    <Wifi className="w-10 h-10 text-white animate-pulse" />
+                  ) : (
+                    <WifiOff className="w-10 h-10 text-white" />
+                  )}
+                </div>
+
+                {/* Pulsing ring animation when online */}
+                {isOnline && (
+                  <div className="absolute inset-0 w-24 h-24 mx-auto rounded-full border-2 border-green-400 animate-ping opacity-30" />
+                )}
+              </div>
+
+              {/* Game Title */}
+              <div className="mb-4">
+                <h1 className="text-2xl font-bold text-white mb-2 bg-gradient-to-r from-yellow-400 to-amber-500 bg-clip-text text-transparent">
+                  Honkai: Star Rail
+                </h1>
+                <div className="flex items-center justify-center gap-2 text-slate-300">
+                  <Star className="w-4 h-4 text-yellow-400" />
+                  <span className="text-sm">Trailblazer Status</span>
+                  <Star className="w-4 h-4 text-yellow-400" />
+                </div>
+              </div>
+
+              {/* Status Badge */}
+              <div className="mb-6">
+                <div className="mb-6 flex items-center justify-center gap-3">
+                  <Badge
+                    variant={isOnline ? "default" : "secondary"}
+                    className={`text-base px-4 py-2 ${
+                      isOnline
+                        ? "bg-green-500 hover:bg-green-600 text-white"
+                        : "bg-gray-600 hover:bg-gray-700 text-gray-200"
+                    }`}
+                  >
+                    {isOnline ? (
+                      <div className="flex items-center gap-2">
+                        <Zap className="w-4 h-4" />
+                        Online & Exploring
+                      </div>
+                    ) : (
+                      "Offline"
+                    )}
+                  </Badge>
+                  
+                  <Button
+                    onClick={handleRefresh}
+                    variant="outline"
+                    size="sm"
+                    className="bg-slate-700/50 hover:bg-slate-600/50 border-slate-600 text-slate-300 hover:text-white"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+
+              {/* Status Description */}
+              <p className="text-slate-300 mb-6 text-sm">
+                {isOnline
+                  ? "Currently aboard the Astral Express, traversing the cosmos and uncovering the mysteries of the universe."
+                  : "The Trailblazer is currently resting. Check back later for cosmic adventures!"}
+              </p>
+
+              {/* Toggle Button */}
+              {/* <Button 
+                onClick={toggleStatus}
+                className={`w-full mb-4 transition-all duration-300 ${
+                  isOnline 
+                    ? 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700' 
+                    : 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700'
+                }`}
+              >
+                {isOnline ? "Go Offline" : "Go Online"}
+              </Button> */}
+
+              {/* Last Update */}
+              <p className="text-xs text-slate-400">
+                Last updated: {formatTime(lastUpdate)}
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Additional Info Card */}
+          <Card className="mt-4 bg-slate-800/40 backdrop-blur-md border-slate-700/50">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between text-sm text-slate-300">
+                <span>Trailblaze Level</span>
+                <span className="text-yellow-400 font-semibold">70</span>
+              </div>
+              <div className="flex items-center justify-between text-sm text-slate-300 mt-2">
+                <span>Current World</span>
+                <span className="text-purple-400">Amphoreus</span>
+              </div>
+            </CardContent>
+          </Card>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
     </div>
   );
-}
+};
+
+export default Index;
