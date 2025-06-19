@@ -173,13 +173,14 @@ const TrailblazerStats = (
               <div className="text-xs text-slate-300 mb-2">Recent Characters</div>
               <div className="grid grid-cols-3 gap-2">
                 {recordData.avatar_list.slice(0, recordData.avatar_list.length).map((avatar, index) => (
-                  <div key={index} className={`relative bg-slate-700/50 rounded p-2 border-2 ${getRarityColor(avatar.rarity, "border")}`}>
+                  <div key={index} className={`relative bg-slate-700/50 rounded p-2 border-2 
+                  ${ avatar.rarity === 5 ? "border-yellow-400" : "border-purple-400" }`}>
                     <img src={avatar.icon} alt={avatar.name} className="w-8 h-8 mx-auto rounded" />
                     <div className="text-center mt-1">
-                      <div className="text-xs text-slate-300 truncate">{avatar.name}</div>
+                      <div className={`text-xs truncate ${ avatar.rarity === 5 ? "text-yellow-400" : "text-purple-400"}`}>{avatar.name}</div>
                       <div className="flex items-center justify-center gap-1 mt-1">
                         <span className="text-xs text-slate-400">Lv.{avatar.level}</span>
-                        <span className={`text-xs ${getRarityColor(avatar.rarity, "text")}`}>E{avatar.rank}</span>
+                        <span className={`text-xs text-slate-400 }`}>E{avatar.rank}</span>
                       </div>
                     </div>
                   </div>

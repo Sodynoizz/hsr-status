@@ -11,7 +11,3 @@ export const getElementColor = (element: string) => {
 
     return colors[element] || 'text-slate-400';
 };
-
-export const getRarityColor = (rarity: number, style: string) => {
-    return rarity === 5 ? `${style}-yellow-400` : `${style}-purple-400`;
-};
