@@ -1,20 +1,18 @@
-import { HonkaiStarRail, LanguageEnum } from "node-hoyolab";
-
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Battery, Clock, Star, Trophy } from "lucide-react";
+import { Battery, Clock, Star, Trophy, Award } from "lucide-react";
 
-import { formatTime } from "@/app/utils/formatTime";
-import { Expedition, ForgottenHallData, NoteData, TrailblazerStatsProps } from "@/app/types/starrail";
+import { getElementColor, getRarityColor } from "@/app/utils/getColor";
+import { TrailblazerStatsProps } from "@/app/types/starrail";
 
 const TrailblazerStats = (
-  { noteData, forgottenHallData }: TrailblazerStatsProps
+  { noteData, forgottenHallData, recordData }: TrailblazerStatsProps
 ) => {
   return (
     <Card className="mt-4 bg-slate-800/40 backdrop-blur-md border-slate-700/50">
       <CardContent className="p-4">
         <Tabs defaultValue="note" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 bg-slate-700/50">
+          <TabsList className="grid w-full grid-cols-3 bg-slate-700/50">
             <TabsTrigger value="note" className="text-xs">
               <Battery className="w-3 h-3 mr-1" />
               Note
@@ -22,6 +20,10 @@ const TrailblazerStats = (
             <TabsTrigger value="forgotten-hall" className="text-xs">
               <Trophy className="w-3 h-3 mr-1" />
               Forgotten Hall
+            </TabsTrigger>
+            <TabsTrigger value="record" className="text-xs">
+              <Trophy className="w-3 h-3 mr-1" />
+              Record
             </TabsTrigger>
           </TabsList>
 
@@ -126,6 +128,58 @@ const TrailblazerStats = (
                       <div className="flex items-center gap-1">
                         <Star className="w-3 h-3 text-yellow-400" />
                         <span className="text-yellow-400">{floor.star_num}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </TabsContent>
+
+           <TabsContent value="record" className="mt-3 space-y-3">
+            {/* General Stats */}
+            <div className="space-y-2">
+              <div className="flex justify-between text-xs text-slate-300">
+                <span>Active Days</span>
+                <span className="text-blue-400">{recordData.stats.active_days}</span>
+              </div>
+              <div className="flex justify-between text-xs text-slate-300">
+                <span>Characters</span>
+                <span className="text-purple-400">{recordData.stats.avatar_num}</span>
+              </div>
+              <div className="flex justify-between text-xs text-slate-300">
+                <span>Achievements</span>
+                <div className="flex items-center gap-1">
+                  <Award className="w-3 h-3 text-yellow-400" />
+                  <span className="text-yellow-400">{recordData.stats.achievement_num}</span>
+                </div>
+              </div>
+              <div className="flex justify-between text-xs text-slate-300">
+                <span>Treasure Chests</span>
+                <span className="text-green-400">{recordData.stats.chest_num}</span>
+              </div>
+            </div>
+
+            {/* Current Status */}
+            <div className="border-t border-slate-600 pt-2 space-y-2">
+              <div className="flex justify-between text-xs text-slate-300">
+                <span>Abyss Progress</span>
+                <span className="text-red-400 text-right text-xs">{recordData.stats.abyss_process}</span>
+              </div>
+            </div>
+
+            {/* Avatar Collection */}
+            <div className="border-t border-slate-600 pt-2">
+              <div className="text-xs text-slate-300 mb-2">Recent Characters</div>
+              <div className="grid grid-cols-3 gap-2">
+                {recordData.avatar_list.slice(0, recordData.avatar_list.length).map((avatar, index) => (
+                  <div key={index} className={`relative bg-slate-700/50 rounded p-2 border-2 ${getRarityColor(avatar.rarity, "border")}`}>
+                    <img src={avatar.icon} alt={avatar.name} className="w-8 h-8 mx-auto rounded" />
+                    <div className="text-center mt-1">
+                      <div className="text-xs text-slate-300 truncate">{avatar.name}</div>
+                      <div className="flex items-center justify-center gap-1 mt-1">
+                        <span className="text-xs text-slate-400">Lv.{avatar.level}</span>
+                        <span className={`text-xs ${getRarityColor(avatar.rarity, "text")}`}>E{avatar.rank}</span>
                       </div>
                     </div>
                   </div>

@@ -10,7 +10,7 @@ import GameTitle from "@/components/GameTitle";
 import TrailblazerStats from "@/components/TrailblazerStats";
 
 import { formatTime } from "@/app/utils/formatTime";
-import { NoteData, ForgottenHallData } from "@/app/types/starrail";
+import { NoteData, ForgottenHallData, RecordData } from "@/app/types/starrail";
 
 const Index = () => {
   const [isOnline, setIsOnline] = useState(false);
@@ -40,6 +40,20 @@ const Index = () => {
     end_time: { month: 0, day: 0 },
     all_floor_detail: []
   });
+  const [recordData, setRecordData] = useState<RecordData>({
+    stats: {
+      active_days: 0,
+      avatar_num: 0,
+      achievement_num: 0,
+      chest_num: 0,
+      abyss_process: "",
+    },
+    dream_paster_num: 0,
+    season_title: "",
+    avatar_list: [],
+    cur_head_icon_url: "",
+    phone_background_image_url: ""
+  });
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -48,10 +62,13 @@ const Index = () => {
 
       setNoteData(data.noteData);
       setForgottenHallData(data.forgottenHallData);
+      setRecordData(data.recordData);
     }
 
-    fetchUser()
-  })
+    fetchUser();
+    const interval = setInterval(fetchUser, 60000); 
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const updateStatus = async () => {
@@ -120,7 +137,7 @@ const Index = () => {
             </CardContent>
           </Card>
 
-          <TrailblazerStats noteData={noteData} forgottenHallData={forgottenHallData} />
+          <TrailblazerStats noteData={noteData} forgottenHallData={forgottenHallData} recordData={recordData}/>
         </div>
       </div>
     </div>

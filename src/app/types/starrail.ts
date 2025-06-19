@@ -41,7 +41,33 @@ export interface ForgottenHallData {
   all_floor_detail: FloorDetail[];
 }
 
+export interface HSRCharacter {
+    id: number,
+    level: number,
+    name: string,
+    element: string,
+    icon: string,
+    rarity: number,
+    rank: number
+}
+
+export interface RecordData {
+  stats: {
+    active_days: number,
+    avatar_num: number,
+    achievement_num: number,
+    chest_num: number,
+    abyss_process: string,
+  },
+  dream_paster_num: number,
+  season_title: string,
+  avatar_list: HSRCharacter[],
+  cur_head_icon_url: string,
+  phone_background_image_url: string
+}
+
 export type TrailblazerStatsProps = {
   noteData: NoteData;
   forgottenHallData: ForgottenHallData;
+  recordData: RecordData;
 };
