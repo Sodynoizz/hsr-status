@@ -1,6 +1,8 @@
 "use client";
 
+import axios from "axios";
 import { useState, useEffect } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,21 +15,16 @@ const Index = () => {
 
   useEffect(() => {
     const updateStatus = async () => {
-      const data = await fetchStatus();
-      console.log(data)
-      
-      if (!data) {
-        console.error("Failed to fetch status");
-        return;
-      }
+      const response = await axios.get("/api/tracker");
+      const data = response.data;
 
       setIsOnline(data.isPlayingHSR);
       setLastUpdate(new Date());
     };
 
-    updateStatus(); // initial fetch
+    updateStatus();
 
-    const interval = setInterval(updateStatus, 60000); // refresh every minute
+    const interval = setInterval(updateStatus, 30000); 
     return () => clearInterval(interval);
   }, []);
 
@@ -35,34 +32,6 @@ const Index = () => {
     window.location.reload();
   };
   
-  const fetchStatus = async () => {
-    try {
-      const res = await fetch('https://corsproxy.io/?https://discord-activity-tracker.onrender.com/status');
-      const data = await res.json(); 
-      return data;
-    } catch (e) {
-      return null;
-    }
-  };
-
-  const handleCheckIn = async () => {
-    const data = await autoSignIn();
-    
-    if (!data) {
-      console.error("Check-in Failed");
-      return; 
-    }
-
-    console.log(data)
-
-    if (data.message.toLowerCase() === "ok") {
-      setIsCheckedIn(true);
-      alert("Check-in successful! Rewards claimed.");
-    }   
-
-    return;
-  }
-
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString("en-US", {
       hour12: true,
@@ -70,21 +39,6 @@ const Index = () => {
       minute: "2-digit",
     });
   };
-
-  const autoSignIn = async () => {
-    const signURL = "https://sg-public-api.hoyolab.com/event/luna/os/sign?lang=en-us&act_id=e202303301540311";
-    
-    const headers = {
-      Cookie: process.env.ITOKEN || "",
-      "User-Agent": "Mozilla/5.0",
-      "Accept": "application/json",
-      "Content-Type": "application/json",
-    };
-
-    const response = await fetch(signURL, { method: "POST", headers });
-
-    return await response.json();
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
@@ -186,26 +140,6 @@ const Index = () => {
                   : "The Trailblazer is currently resting. Check back later for cosmic adventures!"}
               </p>
 
-              {/* HoYoLAB Check-in Button */}
-               <div className="mb-4">
-                  <Button 
-                    onClick={handleCheckIn}
-                    disabled={isCheckedIn}
-                    className={`w-full mb-2 transition-all duration-300 ${
-                      isCheckedIn 
-                        ? 'bg-gray-500 hover:bg-gray-500 cursor-not-allowed opacity-60' 
-                        : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700'
-                    }`}
-                  >
-                    <Gift className="w-4 h-4 mr-2" />
-                    {isCheckedIn ? "Already Checked In Today" : "HoYoLAB Daily Check-in"}
-                  </Button>
-                  {isCheckedIn && (
-                    <p className="text-xs text-green-400 mb-2">
-                      ✓ Daily rewards claimed! Come back tomorrow.
-                    </p>
-                  )}
-              </div>
 
               {/* Last Update */}
               <p className="text-xs text-slate-400">
