@@ -4,10 +4,11 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Wifi, WifiOff, Star, Zap, RefreshCw } from "lucide-react";
+import { Wifi, WifiOff, Star, Zap, RefreshCw, Gift } from "lucide-react";
 
 const Index = () => {
   const [isOnline, setIsOnline] = useState(false);
+  const [isCheckedIn, setIsCheckedIn] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
 
   useEffect(() => {
@@ -44,6 +45,24 @@ const Index = () => {
     }
   };
 
+  const handleCheckIn = async () => {
+    const data = await autoSignIn();
+    
+    if (!data) {
+      console.error("Check-in Failed");
+      return; 
+    }
+
+    console.log(data)
+
+    if (data.message.toLowerCase() === "ok") {
+      setIsCheckedIn(true);
+      alert("Check-in successful! Rewards claimed.");
+    }   
+
+    return;
+  }
+
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString("en-US", {
       hour12: true,
@@ -51,6 +70,21 @@ const Index = () => {
       minute: "2-digit",
     });
   };
+
+  const autoSignIn = async () => {
+    const signURL = "https://sg-public-api.hoyolab.com/event/luna/os/sign?lang=en-us&act_id=e202303301540311";
+    
+    const headers = {
+      Cookie: process.env.ITOKEN || "",
+      "User-Agent": "Mozilla/5.0",
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+    };
+
+    const response = await fetch(signURL, { method: "POST", headers });
+
+    return await response.json();
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
@@ -152,17 +186,26 @@ const Index = () => {
                   : "The Trailblazer is currently resting. Check back later for cosmic adventures!"}
               </p>
 
-              {/* Toggle Button */}
-              {/* <Button 
-                onClick={toggleStatus}
-                className={`w-full mb-4 transition-all duration-300 ${
-                  isOnline 
-                    ? 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700' 
-                    : 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700'
-                }`}
-              >
-                {isOnline ? "Go Offline" : "Go Online"}
-              </Button> */}
+              {/* HoYoLAB Check-in Button */}
+               <div className="mb-4">
+                  <Button 
+                    onClick={handleCheckIn}
+                    disabled={isCheckedIn}
+                    className={`w-full mb-2 transition-all duration-300 ${
+                      isCheckedIn 
+                        ? 'bg-gray-500 hover:bg-gray-500 cursor-not-allowed opacity-60' 
+                        : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700'
+                    }`}
+                  >
+                    <Gift className="w-4 h-4 mr-2" />
+                    {isCheckedIn ? "Already Checked In Today" : "HoYoLAB Daily Check-in"}
+                  </Button>
+                  {isCheckedIn && (
+                    <p className="text-xs text-green-400 mb-2">
+                      ✓ Daily rewards claimed! Come back tomorrow.
+                    </p>
+                  )}
+              </div>
 
               {/* Last Update */}
               <p className="text-xs text-slate-400">
