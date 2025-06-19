@@ -3,6 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Battery, Clock, Star, Trophy, Award } from "lucide-react";
 
 import { TrailblazerStatsProps } from "@/app/types/starrail";
+import { formatSecondsToHM } from "@/app/utils/formatTime";
 
 const TrailblazerStats = (
   { noteData, forgottenHallData, recordData }: TrailblazerStatsProps
@@ -35,7 +36,7 @@ const TrailblazerStats = (
               </div>
               <div className="flex justify-between text-xs text-slate-300">
                 <span>Recovery Time</span>
-                <span className="text-green-400">{noteData.stamina_recover_time}</span>
+                <span className="text-green-400">{formatSecondsToHM(noteData.stamina_recover_time)}</span>
               </div>
               <div className="flex justify-between text-xs text-slate-300">
                 <span>Reserve Stamina</span>
