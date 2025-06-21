@@ -4,16 +4,19 @@ import axios from "axios";
 import { useState, useEffect } from "react";
 
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import StatusIcon from "@/components/StatusIcon";
 import StatusBadge from "@/components/StatusBadge";
 import GameTitle from "@/components/GameTitle";
 import TrailblazerStats from "@/components/TrailblazerStats";
 
-import { formatTime } from "@/app/utils/formatTime";
+import { formatTime, getCurrentMonth, getTotalDaysInMonth } from "@/app/utils/formatTime";
 import { NoteData, ForgottenHallData, RecordData } from "@/app/types/starrail";
+import { Gift, Calendar, Star } from "lucide-react";
 
 const Index = () => {
   const [isOnline, setIsOnline] = useState(false);
+  const [isCheckedIn, setIsCheckedIn] = useState(true);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
 
   const [noteData, setNoteData] = useState<NoteData>({
@@ -54,40 +57,75 @@ const Index = () => {
     cur_head_icon_url: "",
     phone_background_image_url: ""
   });
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      const response = await axios.get("/api/hsr");
-      const data = response.data;
-
-      setNoteData(data.noteData);
-      setForgottenHallData(data.forgottenHallData);
-      setRecordData(data.recordData);
+  const [rewardData, setRewardData] = useState({
+    total_sign_day: 0,
+    reward: {
+      icon: "",
+      name: "",
+      cnt: 0
     }
-
-    fetchUser();
-    const interval = setInterval(fetchUser, 60000); 
-    return () => clearInterval(interval);
-  }, []);
+  })
 
   useEffect(() => {
-    const updateStatus = async () => {
-      const response = await axios.get("/api/tracker");
-      const data = response.data;
-
-      setIsOnline(data.isPlayingHSR);
-      setLastUpdate(new Date());
-    };
-
+    handleCheckIn();
+    fetchUser();
     updateStatus();
+    fetchHoyolabReward();
 
-    const interval = setInterval(updateStatus, 30000); 
-    return () => clearInterval(interval);
+    const userInterval = setInterval(fetchUser, 60000); 
+    const rewardInterval = setInterval(fetchHoyolabReward, 60000);
+    const statusInterval = setInterval(updateStatus, 30000); 
+    const checkInInterval = setInterval(handleCheckIn, 43200000);
+    
+    return () => {
+      clearInterval(userInterval);
+      clearInterval(rewardInterval);
+      clearInterval(statusInterval);
+      clearInterval(checkInInterval);
+    };
   }, []);
 
   const handleRefresh = () => {
     window.location.reload();
   };
+
+  const handleCheckIn = async () => {
+    const response = await axios.get("/api/hoyolab/claim");
+    const data = response.data;
+
+    setIsCheckedIn(data.code !== -5003);   
+
+    return
+  };
+
+  const updateStatus = async () => {
+    const response = await axios.get("/api/tracker");
+    const data = response.data;
+
+    setIsOnline(data.isPlayingHSR);
+    setLastUpdate(new Date());
+  };
+
+
+  const fetchUser = async () => {
+    const response = await axios.get("/api/hsr");
+    const data = response.data;
+
+    setNoteData(data.noteData);
+    setForgottenHallData(data.forgottenHallData);
+    setRecordData(data.recordData);
+
+    return
+  }
+
+  const fetchHoyolabReward = async () => {
+    const response = await axios.get("/api/hoyolab/reward");
+    const data = response.data;
+
+    setRewardData(data);
+
+    return
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
@@ -125,11 +163,55 @@ const Index = () => {
               {/* Status Description */}
               <p className="text-slate-300 mb-6 text-sm">
                 {isOnline 
-                  ? "Currently aboard the Astral Express, traversing the cosmos and uncovering the mysteries of the universe." 
-                  : "The Trailblazer is currently resting. Check back later for cosmic adventures!"
+                  ? "ขณะนี้ผู้เล่นกำลังออนไลน์อยู่ กรุณารอสักครู่" 
+                  : "ตอนนี้ผู้เล่นกำลังออฟไลน์อยู่ สามารถเข้าเล่นเกมได้เลยคับ"
                 }
               </p>
+              
+              <div className="bg-slate-900/40 rounded-lg p-3 mb-4 border border-slate-600/30">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <Gift className="w-4 h-4 text-yellow-400" />
+                  <span className="text-base font-medium text-slate-200">HoYoLAB Today's Reward</span>
+                </div>
+                 <div className="flex items-center justify-center gap-2 mb-3">
+                  <img 
+                    src={rewardData.reward.icon} 
+                    alt="Stellar Jade"
+                    className="w-8 h-8 rounded-full object-cover"
+                  />
+                  <p className="text-yellow-400 font-normal text-sm">{rewardData.reward.name} (x{rewardData.reward.cnt})</p>
+                </div>
+                <div className="flex items-center justify-between text-xs text-slate-300">
+                  <div className="flex items-center gap-1">
+                    <Calendar className="w-3 h-3" />
+                    <span>{getCurrentMonth()}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Star className="w-3 h-3 text-blue-400" />
+                    <span>{rewardData.total_sign_day}/{getTotalDaysInMonth()} days</span>
+                  </div>
+                </div>
+                
+                {/* Progress bar */}
+                <div className="mt-2 bg-slate-700 rounded-full h-1.5">
+                  <div 
+                    className="bg-gradient-to-r from-blue-500 to-purple-500 h-1.5 rounded-full transition-all duration-300"
+                    style={{ width: `${(rewardData.total_sign_day / getTotalDaysInMonth()) * 100}%` }}
+                  />
+                </div>
+              </div>
 
+              <Button 
+                onClick={handleCheckIn}
+                disabled={isCheckedIn}
+                  className={`w-full mb-3 h-9 transition-all duration-300 ${
+                  isCheckedIn 
+                    ? 'bg-gray-500 hover:bg-gray-500 text-gray-300 cursor-not-allowed' 
+                    : 'bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 text-white'
+                }`}
+              >
+                {isCheckedIn ? "Checked In ✓" : "Check-in HoyoLab"}
+              </Button>
               {/* Last Update */}
               <p className="text-xs text-slate-400">
                 Last updated: {formatTime(lastUpdate)}

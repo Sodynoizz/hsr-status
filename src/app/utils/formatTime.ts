@@ -6,6 +6,15 @@ export const formatTime = (date: Date) => {
     });
 };
 
+export const getCurrentMonth = () => {
+    return new Date().toLocaleDateString('en-US', { month: 'long' });
+};
+
+export const getTotalDaysInMonth = () => {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+};
+
 export const formatSecondsToHM = (seconds: number) => {
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
