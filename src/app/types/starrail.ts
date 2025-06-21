@@ -66,6 +66,15 @@ export interface RecordData {
   phone_background_image_url: string
 }
 
+export interface HoyolabReward {
+  total_sign_day: number;
+  reward: {
+    icon: string;
+    name: string;
+    cnt: number;
+  };
+}
+
 export type TrailblazerStatsProps = {
   noteData: NoteData;
   forgottenHallData: ForgottenHallData;

@@ -1,7 +1,10 @@
 "use client";
 
-import axios from "axios";
 import { useState, useEffect } from "react";
+
+import useStarRailStore from "@/app/hooks/starrail";
+import { fetchData } from "@/app/utils/fetch";
+import { formatTime, getCurrentMonth, getTotalDaysInMonth } from "@/app/utils/formatTime";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,62 +12,18 @@ import StatusIcon from "@/components/StatusIcon";
 import StatusBadge from "@/components/StatusBadge";
 import GameTitle from "@/components/GameTitle";
 import TrailblazerStats from "@/components/TrailblazerStats";
-
-import { formatTime, getCurrentMonth, getTotalDaysInMonth } from "@/app/utils/formatTime";
-import { NoteData, ForgottenHallData, RecordData } from "@/app/types/starrail";
 import { Gift, Calendar, Star } from "lucide-react";
 
 const Index = () => {
   const [isOnline, setIsOnline] = useState(false);
   const [isCheckedIn, setIsCheckedIn] = useState(true);
-  const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
-
-  const [noteData, setNoteData] = useState<NoteData>({
-    current_stamina: 0,
-    max_stamina: 0,
-    stamina_recover_time: 0,
-    current_reserve_stamina: 0,
-    accepted_epedition_num: 0,
-    total_expedition_num: 0,
-    expeditions: [],
-    current_rogue_score: 0,
-    max_rogue_score: 0,
-    weekly_cocoon_cnt: 0,
-    weekly_cocoon_limit: 0,
-    rogue_tourn_weekly_cur: 0,
-    rogue_tourn_weekly_max: 0
-  });
-  const [forgottenHallData, setForgottenHallData] = useState<ForgottenHallData>({
-    star_num: 0,
-    max_floor: "",
-    battle_num: 0,
-    schedule_id: "",
-    begin_time: { month: 0, day: 0 },
-    end_time: { month: 0, day: 0 },
-    all_floor_detail: []
-  });
-  const [recordData, setRecordData] = useState<RecordData>({
-    stats: {
-      active_days: 0,
-      avatar_num: 0,
-      achievement_num: 0,
-      chest_num: 0,
-      abyss_process: "",
-    },
-    dream_paster_num: 0,
-    season_title: "",
-    avatar_list: [],
-    cur_head_icon_url: "",
-    phone_background_image_url: ""
-  });
-  const [rewardData, setRewardData] = useState({
-    total_sign_day: 0,
-    reward: {
-      icon: "",
-      name: "",
-      cnt: 0
-    }
-  })
+  const [lastUpdate, setLastUpdate] = useState<Date>(new Date())
+  const {
+    noteData, setNoteData,
+    forgottenHallData, setForgottenHallData,
+    recordData, setRecordData,
+    rewardData, setRewardData
+  } = useStarRailStore();
 
   useEffect(() => {
     handleCheckIn();
@@ -72,17 +31,9 @@ const Index = () => {
     updateStatus();
     fetchHoyolabReward();
 
-    const userInterval = setInterval(fetchUser, 60000); 
-    const rewardInterval = setInterval(fetchHoyolabReward, 60000);
-    const statusInterval = setInterval(updateStatus, 30000); 
     const checkInInterval = setInterval(handleCheckIn, 43200000);
     
-    return () => {
-      clearInterval(userInterval);
-      clearInterval(rewardInterval);
-      clearInterval(statusInterval);
-      clearInterval(checkInInterval);
-    };
+    return () => clearInterval(checkInInterval);
   }, []);
 
   const handleRefresh = () => {
@@ -90,26 +41,23 @@ const Index = () => {
   };
 
   const handleCheckIn = async () => {
-    const response = await axios.get("/api/hoyolab/claim");
-    const data = response.data;
-
+    const data = await fetchData("/api/hoyolab/claim");
     setIsCheckedIn(data.code === -5003);   
-
+    
     return
   };
 
   const updateStatus = async () => {
-    const response = await axios.get("/api/tracker");
-    const data = response.data;
+    const data = await fetchData("/api/tracker");
 
-    setIsOnline(data.isPlayingHSR);
+    setIsOnline(data.isPlayingHSR as boolean);
     setLastUpdate(new Date());
+
+    return;
   };
 
-
   const fetchUser = async () => {
-    const response = await axios.get("/api/hsr");
-    const data = response.data;
+    const data = await fetchData("/api/hsr");
 
     setNoteData(data.noteData);
     setForgottenHallData(data.forgottenHallData);
@@ -119,9 +67,7 @@ const Index = () => {
   }
 
   const fetchHoyolabReward = async () => {
-    const response = await axios.get("/api/hoyolab/reward");
-    const data = response.data;
-
+    const data = await fetchData("/api/hoyolab/reward");
     setRewardData(data);
 
     return
