@@ -93,7 +93,7 @@ const Index = () => {
     const response = await axios.get("/api/hoyolab/claim");
     const data = response.data;
 
-    setIsCheckedIn(data.code !== -5003);   
+    setIsCheckedIn(data.code === -5003);   
 
     return
   };

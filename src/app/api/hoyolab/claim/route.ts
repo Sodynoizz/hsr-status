@@ -6,7 +6,7 @@ import { NextResponse } from "next/server";
 export async function GET() {
   try {
     const response = await hsr.daily.claim()
-    console.log(response)
+
     return NextResponse.json({
       code: response.code,
       info: response.info,
