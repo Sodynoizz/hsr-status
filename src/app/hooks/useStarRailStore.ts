@@ -1,7 +1,7 @@
 import { create } from "zustand";
 
 import { ForgottenHallData, HoyolabReward, NoteData, RecordData } from "@/app/types/starrail"
-import { initialNoteData, initialForgottenHallData, initialRecordData, initialRewardData } from "@/app/store/starrail";
+import { initialNoteData, initialForgottenHallData, initialRecordData, initialRewardData } from "@/app/constants/starrail";
 
 export type StarRailState = {
   noteData: NoteData;

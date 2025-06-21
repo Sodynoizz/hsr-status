@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 
-import useStarRailStore from "@/app/hooks/starrail";
+import useStarRailStore from "@/app/hooks/useStarRailStore";
 import { fetchData } from "@/app/utils/fetch";
 import { formatTime, getCurrentMonth, getTotalDaysInMonth } from "@/app/utils/formatTime";
 

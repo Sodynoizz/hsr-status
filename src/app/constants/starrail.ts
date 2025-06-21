@@ -1,4 +1,4 @@
-import { ForgottenHallData, HoyolabReward, NoteData, RecordData } from "@/app/types/starrail"
+import { NoteData, ForgottenHallData, RecordData, HoyolabReward } from '../types/starrail';
 
 export const initialNoteData: NoteData = {
   current_stamina: 0,
