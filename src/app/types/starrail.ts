@@ -80,3 +80,34 @@ export type TrailblazerStatsProps = {
   forgottenHallData: ForgottenHallData;
   recordData: RecordData;
 };
+
+
+export interface HsrAccountData {
+    "uid": string,
+    "nickname": string,
+    "level": number,
+    "world_level": number,
+    "friend_count": number,
+    "avatar": {
+      "id": string,
+      "name": string,
+      "icon": string
+    },
+    "signature": string,
+    "is_display": boolean,
+    "space_info": {
+      "memory_data": {
+        "level": number,
+        "chaos_id"?: number | null,
+        "chaos_level": number,
+        "chaos_star_count": number
+      },
+      "universe_level": number,
+      "avatar_count": number,
+      "light_cone_count": number,
+      "relic_count": number,
+      "achievement_count": number,
+      "book_count": number,
+      "music_count": number
+    }
+};
